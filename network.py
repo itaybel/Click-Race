@@ -9,7 +9,8 @@ class Network:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = "10.0.0.2"
         self.ishosting = ishosting
-        self.port = 6002
+
+        self.port = 6003
         self.addr = (self.server, self.port)
         self.gameId = self.connect()
 
@@ -29,6 +30,8 @@ class Network:
     def connect(self):
         self.client.connect(self.addr)
         self.client.send(pickle.dumps(self.ishosting))
+        if self.ishosting:
+            self.gameCode =  self.client.recv(2048).decode()
 
         return pickle.loads(self.client.recv(2048))
 

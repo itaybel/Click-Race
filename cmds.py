@@ -1,3 +1,5 @@
+import socket
+
 # encrypt = {
 #
 # }
@@ -30,7 +32,9 @@
 #     new[value] = key
 #
 # print(new)
+#
+# string ="abcdefghijklmnopqrstuvwxyz1234567890"
+# for i in string:
+#     print(f"if event.key == pygame.K_{i}:\n\treturn str('{i}')")
 
-string ="abcdefghijklmnopqrstuvwxyz1234567890"
-for i in string:
-    print(f"if event.key == pygame.K_{i}:\n\treturn str('{i}')")
+print(socket.gethostbyname(socket.gethostname()))

@@ -88,7 +88,7 @@ def getPythonInput(event):
 
     return ""
 
-def redrawWindow(win,game,p, n):
+def redrawWindow(win,game,p, n, Hosting=False):
 
     win.fill((255,255,255))
     player = game.players[p]
@@ -102,6 +102,11 @@ def redrawWindow(win,game,p, n):
 
         text_width, text_height = matchStartFont.size("The match cant start yet.")
         matchStartText = matchStartFont.render("The match cant start yet.", False, (10, 0, 0))
+
+        if Hosting:
+            font = pygame.font.SysFont("calibri", 60)
+            text = font.render(f"Match Code: {n.gameCode}", 1, (0, 0, 0))
+            win.blit(text, (width // 2 - text.get_width() // 2, 50))
 
 
         win.blit(matchStartText, (win.get_width() // 2 - text_width // 2, win.get_height() // 2  - text_height // 2))
@@ -132,13 +137,11 @@ def redrawWindow(win,game,p, n):
 
 
             winFont = pygame.font.SysFont('Comic Sans MS', 70)
-            print(f"your x is {player.x}")
             winner = ""
             for playerInMatch in game.players:
                 if playerInMatch.IsWon():
                     winner = playerInMatch
 
-            print("winnerrrrrr", game.gameEnded())
 
 
             text = winFont.render(f"{EndedPlayer.car.split('.')[0]} Won!", 1, (10, 0, 0))
@@ -166,9 +169,11 @@ def decrypt(string):
 
     return "".join([encryption[i] for i in stringAsArray])
 
-def main(n, Hosting):
+def main(n=None, Hosting=False, IsSecondIsPrivate=True):
+    if n == None:
+        n = Network(Hosting)
 
-    n.ishosting = Hosting
+
 
     pygame.font.init()
 
@@ -180,21 +185,21 @@ def main(n, Hosting):
     for key, value in gameIdEnrypt.items():
         gameInfo[key] = decrypt(value)
 
-    print(gameIdEnrypt)
 
     player = int(gameInfo["playerId"])
+
     fps = int(gameInfo["fps"])
     speed = int(gameInfo["speed"])
+
+
 
 
     clock = pygame.time.Clock()
 
 
-    #thread = threading.Thread(target=threaded_client, args=(n,))
-    #thread.start()
+
     while run:
         clock.tick(fps)
-        #game = pickle.loads(n.client.recv(2048))
 
 
         try:
@@ -219,8 +224,11 @@ def main(n, Hosting):
                 run = False
                 pygame.quit()
 
+        redrawWindow(win, game, player, n, Hosting)
 
-        redrawWindow(win, game, player, n)
+
+
+
 
 def getClickedBtn(btns, pos):
     x = pos[0]
@@ -241,24 +249,50 @@ def getClickedBtn(btns, pos):
 
 def checkCode(n, code):
 
-    used_codes = #how tf can I know the used codes, I mean, I dont know to what I need to change my server code
+    n.client.send(str.encode("code_" + code))
+
+    IsFound = pickle.loads(n.client.recv(2048))
+    if IsFound == "false":
+        IsFound = False
+    else:
+        IsFound = True
+
+    return IsFound
 
 
-def join_game_screen(n):
+
+
+
+def join_game_screen(n=None):
+
+    n = Network(False)
+
     pygame.font.init()
     run = True
     clock = pygame.time.Clock()
 
     gameCode = ""
+    IsNotFound = False
     while run:
         clock.tick(60)
         win.fill((160, 160, 160))
         font = pygame.font.SysFont("calibri", 100)
 
+
+
         #info text
         infoFont = pygame.font.SysFont("calibri", 60)
         text = infoFont.render("Please enter the code of the match", 1, (0, 0, 0))
         win.blit(text, (width // 2 - text.get_width() // 2, 50))
+
+        #not found text
+        notfoundFont = pygame.font.SysFont("calibri", 60)
+        text = notfoundFont.render("Invalid Code", 1, (255, 0, 0))
+        if IsNotFound:
+            win.blit(text, (width // 2 - text.get_width() // 2, win.get_height() - 100))
+            pygame.time.delay(1000)
+            join_game_screen()
+            return
 
 
         # Play button
@@ -270,6 +304,12 @@ def join_game_screen(n):
         StartButtonY = 500
 
         playBtn = pygame.draw.rect(win, (0, 0, 0), (StartButtonX, StartButtonY, StartButtonWidth, StartButtonHeight),width=4)
+
+        backImg = pygame.image.load("images/back.png")
+        backRect = backImg.get_rect()
+        backRect.x, backRect.y = (0, 0)
+        win.blit(backImg, backRect)
+
 
 
         text = font.render("Join", 1, (0, 0, 0))
@@ -295,9 +335,25 @@ def join_game_screen(n):
                 run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                Joined = getClickedBtn(playBtn)
-                if Joined:
-                    checkCode(n, gameCode)
+                btnClicked = getClickedBtn([playBtn, backRect], pygame.mouse.get_pos())
+                if btnClicked is None:
+                    btnClicked = [-1, -1]
+                if btnClicked[1] == 0:
+
+
+                    IsFound = checkCode(n, gameCode)
+                    if not IsFound:
+                        IsNotFound = True
+                    else:
+                        #'o1xf3q': '1' '621qv1': '0',
+                        n.gameId["playerId"] = 'o1xf3q' #which means 1
+
+                        n.client.send(str.encode("matchstart_" + gameCode))
+                        main(n, False, IsSecondIsPrivate=True)
+
+                if btnClicked[1] == 1:
+                    menu_screen()
+
 
             if event.type == pygame.KEYDOWN:
                 if event.key == 8:
@@ -313,7 +369,7 @@ def join_game_screen(n):
 
 
 
-def menu_screen(n):
+def menu_screen():
     pygame.font.init()
     run = True
     clock = pygame.time.Clock()
@@ -392,7 +448,7 @@ def menu_screen(n):
 
                     if btnIndex == 0: #if its the play btn
                         run = False
-                        main(False)
+                        main(Hosting=False)
 
                         return
                     if btnIndex == 1: #if its the host  btn
@@ -405,12 +461,12 @@ def menu_screen(n):
 
 
     if hostGame:
-        main(n, Hosting=True)
+        main(Hosting=True)
 
     if JoinGame:
-        join_game_screen(n)
+        join_game_screen()
     else:
-        main(n, Hosting=False)
+        main(Hosting=False)
 
 
 
@@ -420,5 +476,4 @@ def menu_screen(n):
 
 
 
-n = Network()
-menu_screen(n)
+menu_screen()

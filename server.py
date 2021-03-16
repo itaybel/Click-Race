@@ -15,7 +15,7 @@ def MyIpAddress():
 server = "10.0.0.2"
 
 
-port = 6002
+port = 6003
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -40,7 +40,7 @@ def encrypt(string):
 
 
 
-def threaded_client(conn, p, gameId, IsHosting):
+def threaded_client(conn, p, gameId, gameType):
 
 
     gameInfo = {
@@ -61,12 +61,50 @@ def threaded_client(conn, p, gameId, IsHosting):
     global idCount
     reply = ""
     while True:
-        try:
-            data = conn.recv(4096).decode()
+        if True:
+            try:
+                data = conn.recv(4096).decode()
+            except:
+                data = pickle.loads(conn.recv(4096))
+
+            if gameType == "regular":
+                if gameId in games:
+                    game = games[gameId]
+
+                    if not data:
+                        break
+
+                    else:
+
+                        if "newx" in data:
+                            newX = int(data.split(",")[1])
+                            playerId = int(data.split(",")[2])
+
+                            game.players[playerId].x = newX
 
 
-            if gameId in games:
-                game = games[gameId]
+
+
+                        if data == "reset":
+                            game.resetWent()
+
+                        if "code" in data:
+                            print("got code")
+                            code = data.split("_")[1]
+                            if code in HostedGames.keys():
+                                game = HostedGames[code]
+                                conn.send(pickle.dumps("true"))
+                                # join shit
+
+                            else:
+                                conn.send(pickle.dumps("false"))
+                        conn.sendall(pickle.dumps(game))
+                else:
+                    break
+
+            else:
+
+                game = HostedGames[gameId]
 
                 if not data:
                     break
@@ -85,23 +123,45 @@ def threaded_client(conn, p, gameId, IsHosting):
                     if data == "reset":
                         game.resetWent()
 
+                    if "code" in data:
+                        code = data.split("_")[1]
+                        print("HostedGames", HostedGames)
+                        print("code", code)
+
+                        if code in HostedGames.keys():
+                            game = HostedGames[code]
+                            conn.send(pickle.dumps("true"))
+                            game.ready = True
+                            print("Game is starting")
+                            # join shit
+
+                        else:
+                            conn.send(pickle.dumps("false"))
+
+                    if  "matchstart" in data:
+                        matchCode = int(data.split("_"))
+                        print("got matchstart")
+                        HostedGames[matchCode].ready = True
 
 
 
-                    conn.sendall(pickle.dumps(game))
-            else:
-                break
 
+        conn.sendall(pickle.dumps(game))
+
+    if gameType == "regular":
+        try:
+            del games[gameId]
         except:
-            break
+            pass
 
-    try:
-        del games[gameId]
-    except:
-        pass
+        idCount -= 1
+    else:
+        try:
+            del HostedGames[gameId]
+        except:
+            pass
 
-    idCount -= 1
-    conn.close
+    conn.close()
 
 
 def generate_game_code():
@@ -110,23 +170,27 @@ def generate_game_code():
     code = ""
     for i in range(7):
         code += random.choice(chars)
-
+    print(code)
     return code
 
 while True:
     conn, addr = s.accept()
     IsHosting = pickle.loads(conn.recv(2048))
-    print("IsHosting", IsHosting)
     print("Connected to:", addr)
 
     if IsHosting:
-        HostedGames[HostedGamesCount] = Game(HostedGamesCount, code=generate_game_code())
+        code = generate_game_code()
+        conn.sendall(str.encode(code))
+
+        HostedGames[code] = Game(HostedGamesCount)
+        print(addr[0] + " Game is", code)
+
         p = 0
-        thread = threading.Thread(target=threaded_client, args=(conn, p, HostedGamesCount, True))
+        thread = threading.Thread(target=threaded_client, args=(conn, p, code, "private"))
         thread.start()
 
     else:
-
+        print("connected")
         idCount += 1 #adding the people who connected
         p = 0
         gameID = (idCount - 1) // 2
@@ -139,5 +203,5 @@ while True:
             p = 1
 
 
-        thread = threading.Thread(target=threaded_client, args=(conn, p, gameID, False))
+        thread = threading.Thread(target=threaded_client, args=(conn, p, gameID, "regular"))
         thread.start()
