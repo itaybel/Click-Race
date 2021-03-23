@@ -6,6 +6,7 @@ from player import Player
 
 class Game:
     def __init__(self, id, code=None):
+        print("Creating a new game with code of", code)
 
         self.ready = False
         self.id = id

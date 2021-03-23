@@ -14,7 +14,7 @@ class Player():
         self.seeAble = True
         self.matchStarted = False
         self.TimerInZero = False
-        self.speed = 3
+        self.speed = 5
         self.IsWinner = False
         self.canWin = True
         self.GameEnded = False
