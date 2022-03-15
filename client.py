@@ -13,77 +13,77 @@ import time
 
 def getPythonInput(event):
     if event.key == pygame.K_a:
-        return str('a')
+        return 'a'
     if event.key == pygame.K_b:
-        return str('b')
+        return 'b'
     if event.key == pygame.K_c:
-        return str('c')
+        return 'c'
     if event.key == pygame.K_d:
-        return str('d')
+        return 'd'
     if event.key == pygame.K_e:
-        return str('e')
+        return 'e'
     if event.key == pygame.K_f:
-        return str('f')
+        return 'f'
     if event.key == pygame.K_g:
-        return str('g')
+        return 'g'
     if event.key == pygame.K_h:
-        return str('h')
+        return 'h'
     if event.key == pygame.K_i:
-        return str('i')
+        return 'i'
     if event.key == pygame.K_j:
-        return str('j')
+        return 'j'
     if event.key == pygame.K_k:
-        return str('k')
+        return 'k'
     if event.key == pygame.K_l:
-        return str('l')
+        return 'l'
     if event.key == pygame.K_m:
-        return str('m')
+        return 'm'
     if event.key == pygame.K_n:
-        return str('n')
+        return 'n'
     if event.key == pygame.K_o:
-        return str('o')
+        return 'o'
     if event.key == pygame.K_p:
-        return str('p')
+        return 'p'
     if event.key == pygame.K_q:
-        return str('q')
+        return 'q'
     if event.key == pygame.K_r:
-        return str('r')
+        return 'r')
     if event.key == pygame.K_s:
-        return str('s')
+        return 's'
     if event.key == pygame.K_t:
-        return str('t')
+        return 't'
     if event.key == pygame.K_u:
-        return str('u')
+        return 'u'
     if event.key == pygame.K_v:
-        return str('v')
+        return 'v'
     if event.key == pygame.K_w:
-        return str('w')
+        return 'w'
     if event.key == pygame.K_x:
-        return str('x')
+        return 'x'
     if event.key == pygame.K_y:
-        return str('y')
+        return 'y'
     if event.key == pygame.K_z:
-        return str('z')
+        return 'z'
     if event.key == pygame.K_1:
-        return str('1')
+        return '1'
     if event.key == pygame.K_2:
-        return str('2')
+        return '2'
     if event.key == pygame.K_3:
-        return str('3')
+        return '3'
     if event.key == pygame.K_4:
-        return str('4')
+        return '4'
     if event.key == pygame.K_5:
-        return str('5')
+        return '5'
     if event.key == pygame.K_6:
-        return str('6')
+        return '6,
     if event.key == pygame.K_7:
-        return str('7')
+        return '7'
     if event.key == pygame.K_8:
-        return str('8')
-    if event.key == pygame.K_9:
-        return str('9')
+        return '8'
+    if event.key == pgame.K_9:
+        return '9'
     if event.key == pygame.K_0:
-        return str('0')
+        return '0'
 
     if event.key == pygame.K_RETURN:
         return "return"
