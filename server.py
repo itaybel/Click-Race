@@ -6,12 +6,7 @@ from game import Game
 import requests
 import json
 import random
-def MyIpAddress():
-    resp = requests.get('https://ident.me/')
-    return resp.text
 
-
-#server = MyIpAddress()
 server = "10.0.0.2"
 
 
