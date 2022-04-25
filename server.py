@@ -3,12 +3,15 @@ import socket
 import threading
 import pickle
 from game import Game
+import requests
+import json
+import random
 
 
 server = "10.0.0.2"
 
 
-port = 6000
+port = 6003
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -27,10 +30,32 @@ HostedGames = {}
 idCount = 0
 HostedGamesCount = 0
 
+def encrypt(string):
+    encryption = {'a': 'cgxmr5', 'b': 'p61ksb', 'c': 'vy7y2i', 'd': '85qyp6', 'e': 'mrwtv1', 'f': 'ld26qd', 'g': 'y7azjm', 'h': 'cssr8c', 'i': 'b6u3cq', 'j': 'h3hoy3', 'k': 'j8iyt6', 'l': 'fuyqvm', 'm': 'mp2qd4', 'n': 'm2yfka', 'o': 'gkm63u', 'p': 'vv75k4', 'q': 'pjgcpp', 'r': 'n0qvhu', 's': 'uk4nc9', 't': '5eebui', 'u': 'ulvvmn', 'v': 'lne008', 'w': '7gewba', 'x': 'krgjkm', 'y': '0vtpbz', 'z': 'cjvu39', '1': 'o1xf3q', '2': 'r9t7qi', '3': '5isjif', '4': '9rpugk', '5': 'ffxb83', '6': 'xd325a', '7': 'rw5wfl', '8': 'ha7t44', '9': 'ak5a6r', '0': '621qv1', " ": "ope3qs"}
+    return ("".join([encryption[i] + "_" for i in string]))[:-1]
+
+
 
 def threaded_client(conn, p, gameId, gameType):
 
 
+    gameInfo = {
+        "playerId" : str(p),
+        "fps": "30",
+        "speed": "24"
+    }
+
+
+    NewGameInfo = {}
+    for key, value in gameInfo.items():
+        NewGameInfo[key] = encrypt("".join([i for i in value]))
+
+
+
+
+    conn.send(pickle.dumps(NewGameInfo))
+    global idCount
+    reply = ""
     while True:
         try:
             data = conn.recv(4096).decode()
@@ -175,4 +200,3 @@ while True:
 
         thread = threading.Thread(target=threaded_client, args=(conn, p, gameID, "regular"))
         thread.start()
-
